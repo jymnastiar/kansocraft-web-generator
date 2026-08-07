@@ -289,7 +289,9 @@ body { font-family: 'Inter', sans-serif; background-color: #09090b; color: #fafa
 ];
 
 // Setup Mock API adapter on Axios
-api.defaults.adapter = async (config: InternalAxiosRequestConfig): Promise<AxiosResponse> => {
+api.defaults.adapter = async (
+  config: InternalAxiosRequestConfig,
+): Promise<AxiosResponse> => {
   // Simulate natural 150ms network latency
   await new Promise((resolve) => setTimeout(resolve, 150));
 
@@ -367,14 +369,16 @@ api.defaults.adapter = async (config: InternalAxiosRequestConfig): Promise<Axios
   // 2. Project routes
   else if (url === "/api/projects" && method === "get") {
     const projects = getProjects();
-    responseData = projects.map((p: Project): ProjectSummary => ({
-      _id: p._id,
-      name: p.name,
-      description: p.description,
-      version: p.version,
-      createdAt: p.createdAt,
-      updatedAt: p.updatedAt,
-    }));
+    responseData = projects.map(
+      (p: Project): ProjectSummary => ({
+        _id: p._id,
+        name: p.name,
+        description: p.description,
+        version: p.version,
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt,
+      }),
+    );
   } else if (url === "/api/projects" && method === "post") {
     const prompt = body.prompt || "New Project";
     const projName = prompt.length > 28 ? prompt.slice(0, 28) + "..." : prompt;
@@ -497,7 +501,9 @@ api.defaults.adapter = async (config: InternalAxiosRequestConfig): Promise<Axios
   }
 
   if (status >= 400) {
-    const err: MockApiError = new Error((responseData as { error?: string })?.error || "Request failed");
+    const err: MockApiError = new Error(
+      (responseData as { error?: string })?.error || "Request failed",
+    );
     err.response = { data: responseData, status, headers: {}, config };
     throw err;
   }
