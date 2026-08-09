@@ -1,4 +1,4 @@
-import { ArrowRight, Paperclip } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
@@ -74,19 +74,6 @@ export default function AI_Prompt({
 
         {/* Toolbar */}
         <div className="flex items-center justify-between px-3 py-2 border-t border-border/50 bg-muted/30">
-          {/* Left: Attach */}
-          <label
-            aria-label="Attach file"
-            className={cn(
-              "cursor-pointer rounded-md p-1.5 transition-colors",
-              "text-muted-foreground hover:text-foreground",
-              "hover:bg-accent",
-            )}
-          >
-            <input className="hidden" type="file" />
-            <Paperclip className="h-4 w-4" />
-          </label>
-
           {/* Right: Submit */}
           <button
             type="button"

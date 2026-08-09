@@ -28,7 +28,8 @@ export const createProjectSlice: StateCreator<
   generatingProject: false,
 
   loadProjects: async () => {
-    if (!get().user) {
+    const userId = get().user?.id;
+    if (!userId) {
       set((state) => {
         state.loadingProjects = false;
       });
@@ -49,6 +50,8 @@ export const createProjectSlice: StateCreator<
   },
 
   generateProject: async (prompt) => {
+    const userId = get().user?.id;
+    if (!userId) return;
     set((state) => {
       state.generatingProject = true;
     });
