@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/toast";
 import { useStore } from "@/stores/store";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,7 +18,6 @@ import { Link, useNavigate } from "react-router-dom";
 export default function LoginPage() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [errorMsg, setErrorMsg] = useState<string>("");
 
   const navigate = useNavigate();
   const authLoading = useStore((state) => state.authLoading);
@@ -25,12 +25,20 @@ export default function LoginPage() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setErrorMsg("");
     try {
       await loginWithEmail(email, password);
+      toast.add({
+        title: "Welcome back!",
+        description: "You have successfully logged in.",
+        type: "success",
+      });
       navigate("/");
     } catch (err: any) {
-      setErrorMsg(err.message);
+      toast.add({
+        title: "Login failed",
+        description: err.message,
+        type: "error",
+      });
     }
   }
   return (
@@ -78,9 +86,6 @@ export default function LoginPage() {
           </div>
         </CardContent>
         <CardFooter className="flex-col gap-2">
-          {errorMsg && (
-            <p className="text-sm text-red-500 font-medium mb-2">{errorMsg}</p>
-          )}
           <Button disabled={authLoading} type="submit" className="w-full">
             {authLoading ? "Loading..." : "Login"}
           </Button>
