@@ -29,8 +29,11 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
       </Route>
 
+      {/* Public Routes */}
+      <Route path="/" element={<HomePage />} />
+
+      {/* Protected Routes */}
       <Route element={<AuthLayout />}>
-        <Route path="/" element={<HomePage />} />
         <Route path="/builder/:id" element={<BuilderPage />} />
         <Route path="/preview/:id" element={<PreviewPage />} />
       </Route>

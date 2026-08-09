@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
+import type { Store } from "@/types/store";
 import { type User } from "@supabase/supabase-js";
 import { type StateCreator } from "zustand";
 
@@ -22,7 +23,7 @@ interface AuthAction {
 export type AuthSlice = AuthState & AuthAction;
 
 export const createAuthSlice: StateCreator<
-  AuthSlice,
+  Store,
   [["zustand/immer", never]],
   [],
   AuthSlice
@@ -122,6 +123,7 @@ export const createAuthSlice: StateCreator<
       if (error) throw error;
       set((state) => {
         state.user = null;
+        state.projects = [];
       });
     } catch (err: any) {
       throw err;
