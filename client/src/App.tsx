@@ -7,13 +7,20 @@ import BuilderPage from "./pages/main/Builder";
 import PreviewPage from "./pages/main/Preview";
 import { useEffect } from "react";
 import { useStore } from "@/stores/store";
+import { supabase } from "./lib/supabaseClient";
 
 function App() {
-  const checkSession = useStore((state) => state.checkSession);
 
   useEffect(() => {
-    checkSession();
-  }, [checkSession]);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      useStore.setState({ user: session?.user ?? null, isCheckingSession: false });
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <Routes>
