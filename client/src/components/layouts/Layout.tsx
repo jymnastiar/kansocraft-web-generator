@@ -4,9 +4,9 @@ import { useStore } from "@/stores/store";
 
 export function AuthLayout() {
   const user = useStore((state) => state.user);
-  const authLoading = useStore((state) => state.authLoading);
+  const isCheckingSession = useStore((state) => state.isCheckingSession);
 
-  if (authLoading) {
+  if (isCheckingSession) {
     return <Loading />;
   }
   if (!user) {
@@ -17,9 +17,9 @@ export function AuthLayout() {
 
 export function GuestLayout() {
   const user = useStore((state) => state.user);
-  const authLoading = useStore((state) => state.authLoading);
+  const isCheckingSession = useStore((state) => state.isCheckingSession);
 
-  if (authLoading) {
+  if (isCheckingSession) {
     return <Loading />;
   }
   if (user) {
