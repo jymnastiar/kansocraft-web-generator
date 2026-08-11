@@ -292,8 +292,20 @@ body { font-family: 'Inter', sans-serif; background-color: #09090b; color: #fafa
 api.defaults.adapter = async (
   config: InternalAxiosRequestConfig,
 ): Promise<AxiosResponse> => {
+  if (config.signal?.aborted) {
+    throw new axios.CanceledError("canceled");
+  }
+
   // Simulate natural 150ms network latency
-  await new Promise((resolve) => setTimeout(resolve, 150));
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(resolve, 150);
+    if (config.signal) {
+      config.signal.addEventListener("abort", () => {
+        clearTimeout(timer);
+        reject(new axios.CanceledError("canceled"));
+      });
+    }
+  });
 
   const method = (config.method || "get").toLowerCase();
   const url = config.url || "";
@@ -392,7 +404,11 @@ api.defaults.adapter = async (
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       messages: [
-        { role: "user", content: prompt, timestamp: new Date().toISOString() },
+        {
+          role: "user",
+          content: `help me to craft ${prompt}`,
+          timestamp: new Date().toISOString(),
+        },
         {
           role: "assistant",
           content: `Generated custom website structure for: "${prompt}".`,
