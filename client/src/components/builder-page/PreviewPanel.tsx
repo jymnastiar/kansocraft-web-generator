@@ -15,7 +15,7 @@ import { FileCode } from "lucide-react";
 interface PreviewPanelProps {
   project: Project;
   activeFile: string;
-  showCode: boolean;
+  showCode?: boolean;
 }
 
 interface SandpackFileWatcherProps {
@@ -63,12 +63,17 @@ function SandpackFileWatcher({ onLivesChanges }: SandpackFileWatcherProps) {
 export default function PreviewPanel({
   project,
   activeFile,
-  showCode,
+  showCode: showCodeProp,
 }: PreviewPanelProps) {
-  const [showErrorOverlay, setShowErrorOverlay] = useState<boolean>(true);
-  const [liveFiles, setLiveFiles] = useState<SandpackFiles>(project.files);
+  const storeShowCode = useStore((state) => state.showCode);
+  const showCode = showCodeProp !== undefined ? showCodeProp : storeShowCode;
 
-  const [leftWidth, setLeftWidth] = useState<number>(50);
+  const showErrorOverlay = useStore((state) => state.showErrorOverlay);
+  const setShowErrorOverlay = useStore((state) => state.setShowErrorOverlay);
+  const leftWidth = useStore((state) => state.editorSplitWidth);
+  const setLeftWidth = useStore((state) => state.setEditorSplitWidth);
+
+  const [liveFiles, setLiveFiles] = useState<SandpackFiles>(project.files);
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
