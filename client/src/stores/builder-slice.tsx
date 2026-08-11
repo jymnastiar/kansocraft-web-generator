@@ -4,10 +4,17 @@ import type { StateCreator } from "zustand";
 import debounce from "lodash.debounce";
 import { toast } from "@/components/ui/toast";
 
+export type BuilderTab = "chat" | "files";
+
 interface BuilderState {
   activeFile: string;
   chatLoading: boolean;
   savingFiles: boolean;
+  showCode: boolean;
+  activeTab: BuilderTab;
+  sidebarWidth: number;
+  editorSplitWidth: number;
+  showErrorOverlay: boolean;
 }
 
 interface BuilderAction {
@@ -15,6 +22,11 @@ interface BuilderAction {
   userChat: (prompt: string) => Promise<any>;
   setChatLoading: (logic: boolean) => void;
   setActiveFile: (file: string) => void;
+  setShowCode: (show: boolean | ((prev: boolean) => boolean)) => void;
+  setActiveTab: (tab: BuilderTab) => void;
+  setSidebarWidth: (width: number) => void;
+  setEditorSplitWidth: (width: number) => void;
+  setShowErrorOverlay: (show: boolean | ((prev: boolean) => boolean)) => void;
   flushProjectFiles: () => Promise<void>;
 }
 
@@ -51,6 +63,12 @@ export const createBuilderSlice: StateCreator<
   activeFile: "/app.js",
   chatLoading: false,
   savingFiles: false,
+  showCode: false,
+  activeTab: "chat",
+  sidebarWidth: 320,
+  editorSplitWidth: 50,
+  showErrorOverlay: true,
+
   setChatLoading: (logic) => {
     set((state) => {
       state.chatLoading = logic;
@@ -60,6 +78,37 @@ export const createBuilderSlice: StateCreator<
   setActiveFile: (file) => {
     set((state) => {
       state.activeFile = file;
+    });
+  },
+
+  setShowCode: (show) => {
+    set((state) => {
+      state.showCode = typeof show === "function" ? show(state.showCode) : show;
+    });
+  },
+
+  setActiveTab: (tab) => {
+    set((state) => {
+      state.activeTab = tab;
+    });
+  },
+
+  setSidebarWidth: (width) => {
+    set((state) => {
+      state.sidebarWidth = width;
+    });
+  },
+
+  setEditorSplitWidth: (width) => {
+    set((state) => {
+      state.editorSplitWidth = width;
+    });
+  },
+
+  setShowErrorOverlay: (show) => {
+    set((state) => {
+      state.showErrorOverlay =
+        typeof show === "function" ? show(state.showErrorOverlay) : show;
     });
   },
 

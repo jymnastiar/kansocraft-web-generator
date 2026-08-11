@@ -31,8 +31,6 @@ export default function BuilderPage() {
   const [publishUrl, setPublishUrl] = useState<string | null>(null);
 
   const [chatPrompt, setChatPrompt] = useState("");
-  const [activeTab, setActiveTab] = useState("chat");
-  const [showCode, setShowCode] = useState(false);
 
   const user = useStore((state) => state.user);
   const activeProject = useStore((state) => state.activeProject);
@@ -44,8 +42,13 @@ export default function BuilderPage() {
   const chatLoading = useStore((state) => state.chatLoading);
   const savingFiles = useStore((state) => state.savingFiles);
   const flushProjectFiles = useStore((state) => state.flushProjectFiles);
+  const showCode = useStore((state) => state.showCode);
+  const setShowCode = useStore((state) => state.setShowCode);
+  const activeTab = useStore((state) => state.activeTab);
+  const setActiveTab = useStore((state) => state.setActiveTab);
+  const sidebarWidth = useStore((state) => state.sidebarWidth);
+  const setSidebarWidth = useStore((state) => state.setSidebarWidth);
 
-  const [sidebarWidth, setSidebarWidth] = useState<number>(320);
   const [isResizingSidebar, setIsResizingSidebar] = useState<boolean>(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
 
