@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
 import { cn } from "@/lib/utils";
+import { useStore } from "@/stores/store";
 
 interface AIPromptProps {
   placeholder?: string;
@@ -22,11 +23,12 @@ export default function AI_Prompt({
     minHeight: 72,
     maxHeight: 300,
   });
+  const generatingProject = useStore((state) => state.generatingProject);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (!value.trim()) return;
+      if (!value.trim() || generatingProject) return;
       onSubmit?.(value);
       setValue("");
       adjustHeight(true);
@@ -34,7 +36,7 @@ export default function AI_Prompt({
   };
 
   const handleSubmit = () => {
-    if (!value.trim()) return;
+    if (!value.trim() || generatingProject) return;
     onSubmit?.(value);
     setValue("");
     adjustHeight(true);
@@ -78,7 +80,7 @@ export default function AI_Prompt({
           <button
             type="button"
             aria-label="Send message"
-            disabled={!value.trim()}
+            disabled={!value.trim() || generatingProject}
             onClick={handleSubmit}
             className={cn(
               "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
