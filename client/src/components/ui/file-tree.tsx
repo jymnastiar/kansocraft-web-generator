@@ -230,13 +230,14 @@ export const TreeNode: React.FC<TreeNodeProps> = ({
 
   return (
     <div className="text-foreground relative select-none">
-      <div
-        className={`flex items-center py-1 px-2 rounded-md cursor-pointer transition-colors text-xs ${
+      <button
+        className={`w-full text-left flex items-center py-1 px-2 rounded-md cursor-pointer transition-colors text-xs ${
           isSelected
             ? "bg-primary/15 text-primary font-medium border border-primary/20"
             : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
         }`}
         onClick={handleToggle}
+        aria-expanded={isFolder ? isOpen : undefined}
       >
         <div className="flex items-center grow min-w-0">
           {isFolder ? (
@@ -249,7 +250,7 @@ export const TreeNode: React.FC<TreeNodeProps> = ({
             <span className="text-xs ml-1 truncate">{item.name}</span>
           </div>
         </div>
-      </div>
+      </button>
 
       {isFolder && isOpen && item.children && (
         <div className="pl-3.5 relative overflow-hidden transition-all duration-200">

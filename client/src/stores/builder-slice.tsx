@@ -7,6 +7,7 @@ import { toast } from "@/components/ui/toast";
 interface BuilderState {
   activeFile: string;
   chatLoading: boolean;
+  savingFiles: boolean;
 }
 
 interface BuilderAction {
@@ -14,13 +15,17 @@ interface BuilderAction {
   userChat: (prompt: string) => Promise<any>;
   setChatLoading: (logic: boolean) => void;
   setActiveFile: (file: string) => void;
-  flushProjectFiles: () => void;
+  flushProjectFiles: () => Promise<void>;
 }
 
 export type BuilderSlice = BuilderAction & BuilderState;
 
 export const debouncedSaveAPI = debounce(
-  async (files: any, projectId: string) => {
+  async (
+    files: any,
+    projectId: string,
+    onComplete?: () => void,
+  ) => {
     try {
       await api.put(`/api/projects/${projectId}/files`, { files });
     } catch (err: any) {
@@ -30,6 +35,8 @@ export const debouncedSaveAPI = debounce(
         type: "error",
       });
       console.error("Auto-save error:", err);
+    } finally {
+      onComplete?.();
     }
   },
   1000,
@@ -43,6 +50,7 @@ export const createBuilderSlice: StateCreator<
 > = (set, get) => ({
   activeFile: "/app.js",
   chatLoading: false,
+  savingFiles: false,
   setChatLoading: (logic) => {
     set((state) => {
       state.chatLoading = logic;
@@ -58,11 +66,27 @@ export const createBuilderSlice: StateCreator<
   updateProjectFiles: (files) => {
     const { activeProject, user } = get();
     if (!activeProject || !user?.id) return;
-    debouncedSaveAPI(files, activeProject._id);
+    set((state) => {
+      if (state.activeProject) {
+        state.activeProject.files = {
+          ...state.activeProject.files,
+          ...files,
+        };
+      }
+      state.savingFiles = true;
+    });
+    debouncedSaveAPI(files, activeProject._id, () => {
+      set((state) => {
+        state.savingFiles = false;
+      });
+    });
   },
 
-  flushProjectFiles: () => {
-    debouncedSaveAPI.flush();
+  flushProjectFiles: async () => {
+    await debouncedSaveAPI.flush();
+    set((state) => {
+      state.savingFiles = false;
+    });
   },
 
   userChat: async (prompt) => {

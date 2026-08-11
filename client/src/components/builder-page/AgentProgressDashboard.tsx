@@ -1,4 +1,4 @@
-import type { Project } from "@/api/api";
+import type { Project, PlannedFile } from "@/api/api";
 import { CheckCircle2Icon, CircleIcon, Loader2Icon } from "lucide-react";
 
 interface AgentProgressDashboardProps {
@@ -67,7 +67,7 @@ export default function AgentProgressDashboard({
               Planned Files ({completed.length}/{planned.length})
             </span>
             <div className="space-y-2.5 max-h-75 overflow-y-auto pr-1">
-              {planned.map((file) => {
+              {planned.map((file: PlannedFile) => {
                 const isCompleted = completed.includes(file.path);
                 const isGenerating = current === file.path;
 

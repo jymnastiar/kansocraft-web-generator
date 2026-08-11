@@ -28,7 +28,7 @@ export default function AI_Prompt({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (!value.trim()) return;
+      if (!value.trim() || generatingProject) return;
       onSubmit?.(value);
       setValue("");
       adjustHeight(true);

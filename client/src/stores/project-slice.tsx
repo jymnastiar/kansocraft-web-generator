@@ -43,6 +43,7 @@ export const createProjectSlice: StateCreator<
     if (!silent) {
       set((state) => {
         state.loadingActiveProject = true;
+        state.activeProject = null;
       });
     }
     try {
@@ -74,6 +75,9 @@ export const createProjectSlice: StateCreator<
       ) {
         return;
       }
+      set((state) => {
+        state.activeProject = null;
+      });
       if (!silent) {
         throw err;
       }

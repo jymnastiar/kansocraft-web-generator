@@ -27,6 +27,7 @@ export default function BuilderPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [publishing, setPublishing] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [publishUrl, setPublishUrl] = useState<string | null>(null);
 
   const [chatPrompt, setChatPrompt] = useState("");
@@ -41,6 +42,8 @@ export default function BuilderPage() {
   const loadProject = useStore((state) => state.loadProject);
   const userChat = useStore((state) => state.userChat);
   const chatLoading = useStore((state) => state.chatLoading);
+  const savingFiles = useStore((state) => state.savingFiles);
+  const flushProjectFiles = useStore((state) => state.flushProjectFiles);
 
   const [sidebarWidth, setSidebarWidth] = useState<number>(320);
   const [isResizingSidebar, setIsResizingSidebar] = useState<boolean>(false);
@@ -91,8 +94,7 @@ export default function BuilderPage() {
 
     const isOngoing =
       activeProject.status === "generating" ||
-      activeProject.status === "pending" ||
-      activeProject.status === "failed";
+      activeProject.status === "pending";
 
     if (isOngoing) {
       useStore.getState().setChatLoading(true);
@@ -181,6 +183,7 @@ export default function BuilderPage() {
     if (!id) return;
     setPublishing(true);
     try {
+      await flushProjectFiles();
       await api.post(`/api/projects/${id}/publish`);
       const url = `${window.location.origin}/publish/${id}`;
       setPublishUrl(url);
@@ -200,9 +203,16 @@ export default function BuilderPage() {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!activeProject) return;
-    exportProjectZip(activeProject);
+    setExporting(true);
+    try {
+      await flushProjectFiles();
+      const currentProject = useStore.getState().activeProject || activeProject;
+      await exportProjectZip(currentProject);
+    } finally {
+      setExporting(false);
+    }
   };
 
   const onSendChat = async (e: React.FormEvent) => {
@@ -266,11 +276,29 @@ export default function BuilderPage() {
           <Button size="sm" onClick={handleOpenPreview}>
             <ExternalLinkIcon size={13} /> Preview
           </Button>
-          <Button disabled={publishing} size="sm" onClick={handlePublish}>
-            <GlobeIcon size={13} /> Publish
+          <Button
+            disabled={publishing || savingFiles}
+            size="sm"
+            onClick={handlePublish}
+          >
+            {publishing ? (
+              <Loader2 size={13} className="animate-spin" />
+            ) : (
+              <GlobeIcon size={13} />
+            )}{" "}
+            Publish
           </Button>
-          <Button size="sm" onClick={handleDownload}>
-            <DownloadIcon size={13} /> Export
+          <Button
+            disabled={exporting || savingFiles}
+            size="sm"
+            onClick={handleDownload}
+          >
+            {exporting ? (
+              <Loader2 size={13} className="animate-spin" />
+            ) : (
+              <DownloadIcon size={13} />
+            )}{" "}
+            Export
           </Button>
         </div>
       </header>

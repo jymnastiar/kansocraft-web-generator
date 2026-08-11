@@ -13,6 +13,11 @@ export interface ChatMessage {
   timestamp: string;
 }
 
+export interface PlannedFile {
+  path: string;
+  description?: string;
+}
+
 export interface Project {
   _id: string;
   name: string;
@@ -24,6 +29,10 @@ export interface Project {
   updatedAt: string;
   messages: ChatMessage[];
   files: Record<string, string | { content?: string }>;
+  filesPlanned?: PlannedFile[];
+  filesGenerated?: string[];
+  currentFile?: string;
+  error?: string;
 }
 
 export interface ProjectSummary {

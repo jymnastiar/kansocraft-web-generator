@@ -26,14 +26,24 @@ export default function PublishModal({
 
   const handleCopyLink = () => {
     if (!publishUrl) return;
-    navigator.clipboard.writeText(publishUrl);
-    setCopied(true);
-    toast.add({
-      title: "Public Link Copied",
-      description: "Public link copied to clipboard",
-      type: "success",
-    });
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard
+      .writeText(publishUrl)
+      .then(() => {
+        setCopied(true);
+        toast.add({
+          title: "Public Link Copied",
+          description: "Public link copied to clipboard",
+          type: "success",
+        });
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch((err: any) => {
+        toast.add({
+          title: "Error copy",
+          description: err,
+          type: "error",
+        });
+      });
   };
 
   return (
