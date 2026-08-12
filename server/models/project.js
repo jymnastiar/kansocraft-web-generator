@@ -24,7 +24,7 @@ const ProjectSchema = new Schema(
     files: { type: Schema.Types.Mixed, default: {} },
     messages: { type: [MessagesSchema], default: [] },
     version: { type: Number, default: 0 },
-    owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    owner: { type: String, required: true },
     published: { type: Boolean, default: false },
     status: {
       type: String,

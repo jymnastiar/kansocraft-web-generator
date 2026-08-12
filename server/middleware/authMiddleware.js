@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "../../client/src/lib/supabaseClient.ts";
 
 export const authMiddleware = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
