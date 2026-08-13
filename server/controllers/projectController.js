@@ -98,27 +98,31 @@ async function runBackgroundGeneration(projectId, prompt) {
           `[Background AI] Finished file ${path} for project ${projectId}`,
         );
 
-        const project = await Project.findById(projectId);
-
-        if (project) {
-          project.files = project.files || {};
-          project.files[path] = { content: code, hash: hashContent(code) };
-          project.filesGenerated = [...(project.filesGenerated || []), path];
-          project.messages.push({
-            role: "assistant",
-            content: `Create files "${path}"`,
-            timestamp: new Date(),
-          });
-          project.currentFile = null;
-          project.markModified("files");
-          await project.save();
-        }
+        await Project.findByIdAndUpdate(projectId, {
+          $push: {
+            filesGenerated: path,
+            messages: {
+              role: "assistant",
+              content: `Create files "${path}"`,
+              timestamp: new Date(),
+            },
+          },
+          currentFile: null,
+        });
       },
     });
 
     console.log(`[Background AI] Successfully generated project ${projectId}`);
     const project = await Project.findById(projectId);
     if (project) {
+      const filesObj = {};
+      for (const [filePath, fileCode] of Object.entries(result.files || {})) {
+        filesObj[filePath] = {
+          content: fileCode,
+          hash: hashContent(fileCode),
+        };
+      }
+      project.files = filesObj;
       project.status = "completed";
       project.version = 1;
       if (result.description) {
@@ -129,6 +133,8 @@ async function runBackgroundGeneration(projectId, prompt) {
         content: `Website generation complete! You can view and edit the files.`,
         timestamp: new Date(),
       });
+      project.currentFile = null;
+      project.markModified("files");
       await project.save();
     }
   } catch (error) {
@@ -142,7 +148,7 @@ async function runBackgroundGeneration(projectId, prompt) {
       $push: {
         messages: {
           role: "assistant",
-          content: `❌ Generation failed: ${error.messages}`,
+          content: `❌ Generation failed: ${error.message}`,
           timestamp: new Date(),
         },
       },

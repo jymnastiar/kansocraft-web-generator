@@ -69,15 +69,18 @@ export async function chat(req, res, next) {
         recentMessages,
       );
 
+      const operations = Array.isArray(result?.operations)
+        ? result.operations
+        : [];
       console.log(
-        `[AI] Got ${result.operations.length} operations: ${result.description}`,
+        `[AI] Got ${operations.length} operations: ${result?.description}`,
       );
 
       const {
         files: updateFiles,
         applied,
         errors,
-      } = applyOperations(project.files, result.operations);
+      } = applyOperations(project.files, operations);
 
       if (errors.length > 0) {
         console.warn(`[Diff] Errors applying operations:`, errors);

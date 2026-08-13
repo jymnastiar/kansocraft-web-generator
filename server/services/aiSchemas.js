@@ -5,8 +5,17 @@ export const GenerationResultSchema = z.object({
   description: z.string().default("Generated project"),
 });
 
+const normalizeOp = (val) => {
+  if (typeof val !== "string") return val;
+  const str = val.trim().toLowerCase();
+  if (["create", "add", "new"].includes(str)) return "create";
+  if (["update", "edit", "modify", "patch"].includes(str)) return "update";
+  if (["delete", "remove", "del", "rm"].includes(str)) return "delete";
+  return str;
+};
+
 export const FileOpSchema = z.object({
-  op: z.enum(["create", "update", "delete"]),
+  op: z.preprocess(normalizeOp, z.enum(["create", "update", "delete"])),
   path: z.string(),
   content: z.string().nullable().optional(),
   search: z.string().nullable().optional(),

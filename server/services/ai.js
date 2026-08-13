@@ -23,6 +23,14 @@ const MAX_CONCURRENCY = Math.max(
   1,
   parseInt(process.env.AI_MAX_CONCURRENCY || "6", 10) || 6,
 );
+const AI_REQUEST_TIMEOUT_MS = parseInt(
+  process.env.AI_REQUEST_TIMEOUT_MS || "90000",
+  10,
+);
+
+if (!process.env.OPENROUTER_API_KEY) {
+  throw new Error("OPENROUTER_API_KEY environment variable is required");
+}
 
 const openrouter = createOpenAI({
   baseURL: "https://openrouter.ai/api/v1",
@@ -49,6 +57,7 @@ async function generateSingleFile(
     system,
     prompt: userMsg,
     maxRetries: 2,
+    abortSignal: AbortSignal.timeout(AI_REQUEST_TIMEOUT_MS),
   });
 
   let code = normalizeContent(object.code);
@@ -86,6 +95,7 @@ export async function generateProject(prompt, callbacks) {
     system: FILE_PLAN_SYSTEM,
     prompt: `Plan a React website for: ${prompt}`,
     maxRetries: 2,
+    abortSignal: AbortSignal.timeout(AI_REQUEST_TIMEOUT_MS),
   });
 
   if (!plan.files.find((f) => f.path === "/App.js")) {
@@ -246,21 +256,12 @@ export async function reviseProject(
     system: REVISE_SYSTEM,
     prompt: contextParts.join("\n"),
     maxRetries: 2,
+    abortSignal: AbortSignal.timeout(AI_REQUEST_TIMEOUT_MS),
   });
 
   if (rawParsed && Array.isArray(rawParsed.operations)) {
     rawParsed.operations = rawParsed.operations.map((op) => {
       if (!op || typeof op !== "object") return op;
-
-      let opStr = String(op.op || "")
-        .trim()
-        .toLowerCase();
-
-      if (["create", "add", "new"].includes(opStr)) op.op = "create";
-      else if (["update", "edit", "modify", "patch"].includes(opStr))
-        op.op = "update";
-      else if (["delete", "remove", "del", "rm"].includes(opStr))
-        op.op = "delete";
 
       if (op.path && typeof op.path === "string" && !op.path.startsWith("/")) {
         op.path = "/" + op.path;

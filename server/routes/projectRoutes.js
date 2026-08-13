@@ -9,7 +9,10 @@ import {
   updateProjectsFiles,
 } from "../controllers/projectController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
-import { createProjectLimiter } from "../middleware/rateLimiter.js";
+import {
+  createProjectLimiter,
+  chatLimiter,
+} from "../middleware/rateLimiter.js";
 import { validateBody } from "../middleware/validateBody.js";
 import {
   createProjectSchema,
@@ -42,6 +45,11 @@ projectRouter.put(
 projectRouter.post(`/:id/publish`, publishProjects);
 
 // Chat router
-projectRouter.post(`/:id/chat`, validateBody(chatSchema), chat);
+projectRouter.post(
+  `/:id/chat`,
+  chatLimiter,
+  validateBody(chatSchema),
+  chat,
+);
 
 export default projectRouter;
