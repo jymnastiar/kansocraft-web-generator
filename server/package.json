@@ -14,6 +14,9 @@
   "license": "ISC",
   "packageManager": "pnpm@10.30.3",
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.40",
+    "@supabase/supabase-js": "^2.112.3",
+    "ai": "^7.0.62",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -21,6 +24,7 @@
     "express-rate-limit": "^8.6.2",
     "mongoose": "^9.9.2",
     "morgan": "^1.11.0",
+    "p-map": "^7.0.6",
     "zod": "^4.4.3"
   },
   "devDependencies": {

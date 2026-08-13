@@ -3,18 +3,8 @@ import "dotenv/config";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
-import { rateLimit } from "express-rate-limit";
 import { connectToDatabase } from "./config/db.js";
 import projectRouter from "./routes/projectRoutes.js";
-
-// Rate limiter — createProject max 10 request/minute/IP
-export const createProjectLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  limit: 10,
-  message: { error: "To many request. tyr again in 1 minute." },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
 
 const app = express();
 
@@ -39,10 +29,19 @@ app.get("/", (req, res) => res.send("Server is Live!"));
 app.use(`/api/projects`, projectRouter);
 
 app.use((err, _req, res, _next) => {
-  console.error(`[Error] ${err.message}`);
-  res.status(500).json({ error: err.message });
-});
+  const statusCode = err.status || err.statusCode || 500;
 
+  console.error(`[Error ${statusCode}] ${err.stack || err.message}`);
+
+  const isDev = process.env.NODE_ENV !== "production";
+  res.status(statusCode).json({
+    error: isDev
+      ? err.message
+      : statusCode === 500
+        ? "Internal server error"
+        : err.message,
+  });
+});
 const port = process.env.PORT || 3000;
 
 connectToDatabase()
