@@ -7,15 +7,17 @@ import {
   SandpackProvider,
   useSandpack,
 } from "@codesandbox/sandpack-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "@/stores/store";
 import SandpackErrorMonitor from "./SandpackErrorMonitor";
-import { FileCode } from "lucide-react";
+import { FileCode, Smartphone, Tablet } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PreviewPanelProps {
   project: Project;
   activeFile: string;
   showCode?: boolean;
+  viewportMode?: "desktop" | "tablet" | "mobile";
 }
 
 interface SandpackFileWatcherProps {
@@ -64,6 +66,7 @@ export default function PreviewPanel({
   project,
   activeFile,
   showCode: showCodeProp,
+  viewportMode = "desktop",
 }: PreviewPanelProps) {
   const storeShowCode = useStore((state) => state.showCode);
   const showCode = showCodeProp !== undefined ? showCodeProp : storeShowCode;
@@ -172,19 +175,22 @@ export default function PreviewPanel({
   };
 
   return (
-    <div ref={containerRef} className="h-full w-full relative select-none">
+    <div
+      ref={containerRef}
+      className="h-full w-full relative select-none bg-background"
+    >
       <style>{`
         .sp-cm .cm-lineNumbers {
-          font-size: 13.5px !important;
-          min-width: 42px !important;
+          font-size: 13px !important;
+          min-width: 38px !important;
           color: #5c6370 !important;
         }
         .sp-cm .cm-gutterElement {
-          font-size: 13.5px !important;
-          padding: 0 8px 0 4px !important;
+          font-size: 13px !important;
+          padding: 0 6px 0 4px !important;
         }
         .sp-cm .cm-content {
-          font-size: 14px !important;
+          font-size: 13.5px !important;
           line-height: 1.6 !important;
         }
       `}</style>
@@ -207,30 +213,30 @@ export default function PreviewPanel({
         }}
         theme={{
           colors: {
-            surface1: "#21232d",
-            surface2: "#18181f",
-            surface3: "#2b2c3a",
-            clickable: "#abb2bf",
-            base: "#abb2bf",
-            disabled: "#5c6370",
-            hover: "#2f3242",
-            accent: "#c678dd",
-            error: "#e06c75",
-            errorSurface: "#382025",
+            surface1: "#18181b",
+            surface2: "#09090b",
+            surface3: "#27272a",
+            clickable: "#a1a1aa",
+            base: "#e4e4e7",
+            disabled: "#71717a",
+            hover: "#27272a",
+            accent: "#10b981",
+            error: "#ef4444",
+            errorSurface: "#2d1619",
           },
           syntax: {
-            keyword: "#c678dd",
-            property: "#e06c75",
-            plain: "#abb2bf",
-            static: "#d19a66",
-            definition: "#61afef",
-            string: "#98c379",
-            tag: "#e5c07b",
+            keyword: "#f43f5e",
+            property: "#38bdf8",
+            plain: "#e4e4e7",
+            static: "#fb923c",
+            definition: "#818cf8",
+            string: "#4ade80",
+            tag: "#38bdf8",
           },
           font: {
-            body: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            mono: '"Fira Code", "JetBrains Mono", "Fira Mono", "Consolas", monospace',
-            size: "14px",
+            body: '"Source Sans 3 Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            mono: '"JetBrains Mono", "Fira Code", "Consolas", monospace',
+            size: "13.5px",
             lineHeight: "1.6",
           },
         }}
@@ -247,34 +253,35 @@ export default function PreviewPanel({
             width: "100%",
           }}
         >
+          {/* CODE EDITOR PANEL */}
           <div
-            style={{
-              width: showCode ? `${leftWidth}%` : "0%",
-              display: showCode ? "flex" : "none",
-              minWidth: showCode ? "250px" : "0px",
-              flexShrink: 0,
-            }}
-            className="flex flex-col h-full"
+            style={
+              {
+                "--editor-width": showCode ? `${leftWidth}%` : "0%",
+              } as React.CSSProperties
+            }
+            className={cn(
+              "flex-col h-full border-r border-border bg-[#09090b] md:w-(--editor-width)",
+              showCode ? "flex w-full md:min-w-60 shrink-0" : "hidden",
+            )}
           >
             {showCode &&
               (() => {
                 const { cleanPath, iconColor, langLabel } =
                   getFileMeta(activeFile);
                 return (
-                  <div className="h-9 bg-[#18181f] border-b border-[#2b2c3a] flex items-center justify-between z-10 select-none">
-                    <div className="flex items-center h-full">
-                      <div className="h-full px-3.5 flex items-center gap-2 bg-[#21232d] text-xs font-mono">
-                        <FileCode size={14} className={iconColor} />
-                        <span className="text-[#abb2bf] font-medium tracking-tight">
-                          {cleanPath}
-                        </span>
-                      </div>
+                  <div className="h-9 bg-[#121215] border-b border-[#27272a] flex items-center justify-between z-10 select-none px-3">
+                    <div className="flex items-center gap-2 text-xs font-mono">
+                      <FileCode size={14} className={iconColor} />
+                      <span className="text-[#e4e4e7] font-semibold tracking-tight">
+                        {cleanPath}
+                      </span>
                     </div>
 
-                    <div className="px-3 flex items-center gap-2.5 text-[11px] font-mono text-[#5c6370]">
+                    <div className="flex items-center gap-2 text-[11px] font-mono text-[#71717a]">
                       <span>UTF-8</span>
-                      <span className="h-3 w-px bg-[#2b2c3a]" />
-                      <span>{langLabel}</span>
+                      <span className="h-3 w-px bg-[#27272a]" />
+                      <span className="text-[#a1a1aa]">{langLabel}</span>
                     </div>
                   </div>
                 );
@@ -293,37 +300,72 @@ export default function PreviewPanel({
             />
           </div>
 
+          {/* RESIZE DIVIDER */}
           {showCode && (
             <div
               onMouseDown={startResizing}
-              className={`w-1.5 h-full bg-[#18181f] hover:bg-accent cursor-col-resize flex items-center justify-center transition-colors group z-20 shrink-0 border-x border-[#2b2c3a] ${
-                isResizing ? "bg-accent" : ""
+              className={`hidden md:flex w-1.5 h-full bg-border hover:bg-primary cursor-col-resize items-center justify-center transition-colors group z-20 shrink-0 select-none ${
+                isResizing ? "bg-primary" : ""
               }`}
-              title="Drag to resize panels"
+              title="Drag to resize code & preview panels"
             >
               <div
-                className={`w-0.5 h-6 rounded bg-[#3e4451] group-hover:bg-white transition-colors ${
-                  isResizing ? "bg-white" : ""
+                className={`w-0.5 h-6 rounded-none bg-muted-foreground/50 group-hover:bg-primary-foreground transition-colors ${
+                  isResizing ? "bg-primary-foreground" : ""
                 }`}
               />
             </div>
           )}
 
+          {/* PREVIEW CONTAINER WITH VIEWPORT SIMULATION */}
           <div
             style={{
               flex: 1,
-              minWidth: showCode ? "150px" : "0px",
               pointerEvents: isResizing ? "none" : "auto",
             }}
-            className="h-full min-w-0"
+            className={cn(
+              "h-full min-w-0 bg-muted/20 flex-col items-center justify-center overflow-hidden",
+              showCode ? "hidden md:flex" : "flex",
+            )}
           >
-            <SandpackPreview
-              showNavigator={false}
-              showRefreshButton
-              showOpenInCodeSandbox={false}
-              showSandpackErrorOverlay={showErrorOverlay}
-              style={{ height: "100%", width: "100%" }}
-            />
+            <div
+              className={`h-full transition-all duration-300 flex flex-col ${
+                viewportMode === "mobile"
+                  ? "w-93.75 max-w-full my-auto border-x border-border shadow-xl bg-background"
+                  : viewportMode === "tablet"
+                    ? "w-3xl max-w-full my-auto border-x border-border shadow-xl bg-background"
+                    : "w-full"
+              }`}
+            >
+              {viewportMode !== "desktop" && (
+                <div className="h-6 bg-card border-b border-border flex items-center justify-between px-3 text-[10px] font-mono text-muted-foreground shrink-0 select-none">
+                  <div className="flex items-center gap-1.5">
+                    {viewportMode === "mobile" ? (
+                      <>
+                        <Smartphone size={11} className="text-primary" />
+                        <span>Mobile View (375px)</span>
+                      </>
+                    ) : (
+                      <>
+                        <Tablet size={11} className="text-primary" />
+                        <span>Tablet View (768px)</span>
+                      </>
+                    )}
+                  </div>
+                  <span>100% SCALE</span>
+                </div>
+              )}
+
+              <div className="flex-1 h-full w-full overflow-hidden">
+                <SandpackPreview
+                  showNavigator={false}
+                  showRefreshButton
+                  showOpenInCodeSandbox={false}
+                  showSandpackErrorOverlay={showErrorOverlay}
+                  style={{ height: "100%", width: "100%" }}
+                />
+              </div>
+            </div>
           </div>
         </SandpackLayout>
       </SandpackProvider>

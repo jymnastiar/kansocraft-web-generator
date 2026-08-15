@@ -5,23 +5,36 @@ import {
   Sparkles,
   Folder,
   MessageSquare,
-  EyeIcon,
-  Code2Icon,
-  ExternalLinkIcon,
-  GlobeIcon,
-  DownloadIcon,
+  Eye,
+  Code2,
+  ExternalLink,
+  Globe,
+  Download,
+  Smartphone,
+  Tablet,
+  Monitor,
+  Info,
 } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 import { useStore } from "@/stores/store";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ProjectFileTree from "@/components/ui/file-tree";
 import PreviewPanel from "@/components/builder-page/PreviewPanel";
 import AgentProgressDashboard from "@/components/builder-page/AgentProgressDashboard";
 import PublishModal from "@/components/builder-page/PublishModal";
+import Loading from "@/components/ui/loading";
 import api from "@/api/api";
 import { exportProjectZip } from "@/utils/exportProject";
+
+const QUICK_COPILOT_PROMPTS = [
+  "Add dark mode toggle support",
+  "Make layout responsive for mobile",
+  "Add smooth entrance animations",
+  "Improve typography and spacing",
+  "Add interactive contact form with toast",
+];
 
 export default function BuilderPage() {
   const { id } = useParams();
@@ -31,6 +44,12 @@ export default function BuilderPage() {
   const [publishUrl, setPublishUrl] = useState<string | null>(null);
 
   const [chatPrompt, setChatPrompt] = useState("");
+  const [viewportMode, setViewportMode] = useState<
+    "desktop" | "tablet" | "mobile"
+  >("desktop");
+  const [mobileTab, setMobileTab] = useState<
+    "preview" | "copilot" | "files" | "code"
+  >("preview");
 
   const user = useStore((state) => state.user);
   const activeProject = useStore((state) => state.activeProject);
@@ -63,7 +82,7 @@ export default function BuilderPage() {
       const rect = workspaceRef.current.getBoundingClientRect();
       const newWidth = e.clientX - rect.left;
       const maxWidth = Math.min(600, rect.width * 0.5);
-      const clampedWidth = Math.min(Math.max(newWidth, 220), maxWidth);
+      const clampedWidth = Math.min(Math.max(newWidth, 240), maxWidth);
       setSidebarWidth(clampedWidth);
     };
 
@@ -158,8 +177,8 @@ export default function BuilderPage() {
         });
       } else {
         toast.add({
-          title: "Success",
-          description: `Updated to version ${data?.version || "latest"}`,
+          title: "Revision applied!",
+          description: `Updated project to version ${data?.version || "latest"}`,
           type: "success",
         });
       }
@@ -167,10 +186,10 @@ export default function BuilderPage() {
       const errorMessage =
         err.response?.data?.error ||
         err.response?.data?.message ||
-        "Failed to process chat request";
+        "Failed to process chat revision request";
 
       toast.add({
-        title: "Chat Failed",
+        title: "Revision Failed",
         description: errorMessage,
         type: "error",
       });
@@ -192,13 +211,13 @@ export default function BuilderPage() {
       setPublishUrl(url);
       toast.add({
         title: "Website Published",
-        description: "Website published successfully!",
+        description: "Website deployed and ready for public access!",
         type: "success",
       });
     } catch (err: any) {
       toast.add({
         title: "Publish Failed",
-        description: err?.response?.data?.error || "Published has been failed",
+        description: err?.response?.data?.error || "Publishing request failed",
         type: "error",
       });
     } finally {
@@ -213,6 +232,17 @@ export default function BuilderPage() {
       await flushProjectFiles();
       const currentProject = useStore.getState().activeProject || activeProject;
       await exportProjectZip(currentProject);
+      toast.add({
+        title: "Export Complete",
+        description: "Project ZIP package downloaded successfully.",
+        type: "success",
+      });
+    } catch (err: any) {
+      toast.add({
+        title: "Export Failed",
+        description: err.message || "Failed to package project ZIP",
+        type: "error",
+      });
     } finally {
       setExporting(false);
     }
@@ -228,12 +258,10 @@ export default function BuilderPage() {
 
   if (loadingActiveProject || !activeProject) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="size-8 text-primary animate-spin" />
-          <p className="text-sm text-muted-foreground">Loading workspace...</p>
-        </div>
-      </div>
+      <Loading
+        message="Loading Workspace Studio"
+        subtext="Synchronizing project files, dependencies, and sandbox runtime..."
+      />
     );
   }
 
@@ -241,137 +269,313 @@ export default function BuilderPage() {
   const fileList = Object.keys(files);
 
   return (
-    <section className="h-screen w-screen bg-background text-foreground flex flex-col overflow-hidden">
-      {/* TOP HEADER */}
-      <header className="h-14 border-b border-border bg-card/50 px-4 flex items-center justify-between z-20">
-        <div className="flex items-center gap-3">
+    <section className="h-screen w-screen bg-background text-foreground flex flex-col overflow-hidden font-sans select-none">
+      {/* TOP STUDIO COMMAND BAR */}
+      <header className="h-13 border-b border-border bg-card px-3 sm:px-4 flex items-center justify-between z-30 shrink-0">
+        {/* Left: Brand, Back & Project Meta */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => navigate("/")}
-            className="p-1.5 hover:bg-muted rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-            title="Back to Dashboard"
+            className="p-1.5 border border-border bg-card hover:border-primary text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            title="Return to Dashboard"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={15} />
           </button>
+
           <div className="h-4 w-px bg-border" />
-          <div>
-            <h1 className="text-sm font-semibold font-heading text-foreground flex items-center gap-2">
-              <img src="/logo.svg" alt="KansoCraft Logo" className="size-5" />
-              {activeProject.name || "Untitled Website"}
-              <span className="text-[10px] bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.5 rounded font-mono">
-                v{activeProject.version || 1}
-              </span>
-            </h1>
+
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="size-6 bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+              <img src="/logo.svg" alt="Logo" className="size-3.5" />
+            </div>
+            <span className="text-xs font-bold font-heading text-foreground tracking-tight max-w-28 sm:max-w-48 truncate">
+              {activeProject.name || "Untitled Application"}
+            </span>
+            <span className="text-[10px] font-mono font-bold bg-primary/10 text-primary border border-primary/30 px-1.5 py-0.5 shrink-0">
+              v{activeProject.version || 1}.0
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <Button size="sm" onClick={() => setShowCode(!showCode)}>
+        {/* Center: Viewport Switcher & View Mode (Desktop only) */}
+        <div className="hidden md:flex items-center gap-2">
+          {/* Viewport Frame Switcher */}
+          <div className="flex items-center border border-border bg-background p-0.5 text-xs font-mono">
+            <button
+              onClick={() => setViewportMode("desktop")}
+              className={`px-2 py-1 flex items-center gap-1.5 transition-colors cursor-pointer ${
+                viewportMode === "desktop"
+                  ? "bg-foreground text-background font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Desktop 100% Scale"
+            >
+              <Monitor size={12} />
+              <span className="text-[11px]">Desktop</span>
+            </button>
+            <button
+              onClick={() => setViewportMode("tablet")}
+              className={`px-2 py-1 flex items-center gap-1.5 transition-colors cursor-pointer ${
+                viewportMode === "tablet"
+                  ? "bg-foreground text-background font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Tablet 768px Frame"
+            >
+              <Tablet size={12} />
+              <span className="text-[11px]">Tablet</span>
+            </button>
+            <button
+              onClick={() => setViewportMode("mobile")}
+              className={`px-2 py-1 flex items-center gap-1.5 transition-colors cursor-pointer ${
+                viewportMode === "mobile"
+                  ? "bg-foreground text-background font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              title="Mobile 375px Frame"
+            >
+              <Smartphone size={12} />
+              <span className="text-[11px]">Mobile</span>
+            </button>
+          </div>
+
+          {/* Code vs Preview Switcher */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowCode(!showCode)}
+            className="rounded-none border-border font-mono text-xs h-7"
+          >
             {showCode ? (
               <>
-                <EyeIcon size={13} /> Preview
+                <Eye size={12} className="text-primary" />
+                <span>Hide Code</span>
               </>
             ) : (
               <>
-                <Code2Icon size={13} /> Code
+                <Code2 size={12} />
+                <span>Split Code</span>
               </>
             )}
           </Button>
-          <Button size="sm" onClick={handleOpenPreview}>
-            <ExternalLinkIcon size={13} /> Preview
+        </div>
+
+        {/* Right: Actions (External Preview, Export, Publish) */}
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleOpenPreview}
+            className="rounded-none border-border font-mono text-xs h-7 hidden sm:flex items-center gap-1"
+          >
+            <ExternalLink size={12} />
+            <span>Full View</span>
           </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={exporting || savingFiles}
+            onClick={handleDownload}
+            className="rounded-none border-border font-mono text-xs h-7 items-center gap-1 px-2.5 sm:px-3"
+          >
+            {exporting ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : (
+              <Download size={12} />
+            )}
+            <span className="hidden sm:inline">Export ZIP</span>
+            <span className="sm:hidden">ZIP</span>
+          </Button>
+
           <Button
             disabled={publishing || savingFiles}
             size="sm"
             onClick={handlePublish}
+            className="rounded-none bg-primary text-primary-foreground font-mono text-xs h-7 items-center gap-1.5 hover:bg-primary/90 px-2.5 sm:px-3"
           >
             {publishing ? (
-              <Loader2 size={13} className="animate-spin" />
+              <Loader2 size={12} className="animate-spin" />
             ) : (
-              <GlobeIcon size={13} />
-            )}{" "}
-            Publish
-          </Button>
-          <Button
-            disabled={exporting || savingFiles}
-            size="sm"
-            onClick={handleDownload}
-          >
-            {exporting ? (
-              <Loader2 size={13} className="animate-spin" />
-            ) : (
-              <DownloadIcon size={13} />
-            )}{" "}
-            Export
+              <Globe size={12} />
+            )}
+            <span className="hidden sm:inline">Publish Live</span>
+            <span className="sm:hidden">Publish</span>
           </Button>
         </div>
       </header>
 
-      {/* WORKSPACE AREA */}
+      {/* MOBILE STUDIO MODE SWITCHER (< md) */}
+      <div className="flex md:hidden border-b border-border bg-card text-xs font-mono shrink-0 select-none z-20">
+        <button
+          onClick={() => {
+            setMobileTab("preview");
+            setShowCode(false);
+          }}
+          className={`flex-1 py-2 flex items-center justify-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
+            mobileTab === "preview" && !showCode
+              ? "border-primary text-primary bg-primary/5 font-semibold"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Eye size={12} />
+          <span>Preview</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setMobileTab("code");
+            setShowCode(true);
+          }}
+          className={`flex-1 py-2 flex items-center justify-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
+            mobileTab === "code" || showCode
+              ? "border-primary text-primary bg-primary/5 font-semibold"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Code2 size={12} />
+          <span>Code</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setMobileTab("copilot");
+            setActiveTab("chat");
+          }}
+          className={`flex-1 py-2 flex items-center justify-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
+            mobileTab === "copilot"
+              ? "border-primary text-primary bg-primary/5 font-semibold"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <MessageSquare size={12} />
+          <span>Copilot</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setMobileTab("files");
+            setActiveTab("files");
+          }}
+          className={`flex-1 py-2 flex items-center justify-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
+            mobileTab === "files"
+              ? "border-primary text-primary bg-primary/5 font-semibold"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Folder size={12} />
+          <span>Files</span>
+        </button>
+      </div>
+
+      {/* WORKSPACE PANELS */}
       <div
         ref={workspaceRef}
         className={`flex-1 flex overflow-hidden ${
           isResizingSidebar ? "select-none" : ""
         }`}
       >
+        {/* LEFT STUDIO SIDEBAR */}
         <aside
-          style={{ width: `${sidebarWidth}px` }}
-          className="shrink-0 border-r border-border bg-card/30 flex flex-col z-10"
+          // style={{
+          //   width:
+          //     typeof window !== "undefined" && window.innerWidth < 768
+          //       ? "100%"
+          //       : `${sidebarWidth}px`,
+          // }}
+          style={{ "--sidebar-w": `${sidebarWidth}px` } as React.CSSProperties}
+          className={`shrink-0 border-r border-border bg-card flex-col z-20 w-full md:w-(--sidebar-w) ${
+            mobileTab === "copilot" || mobileTab === "files"
+              ? "flex"
+              : "hidden md:flex"
+          }`}
         >
-          <div className="flex border-b border-border">
+          {/* TAB SELECTOR HEADER */}
+          <div className="flex border-b border-border bg-muted/20">
             <button
               onClick={() => setActiveTab("chat")}
-              className={`flex-1 py-2.5 text-xs font-medium flex items-center justify-center gap-2 border-b-2 transition-all ${
+              className={`flex-1 py-2 text-xs font-mono font-medium flex items-center justify-center gap-1.5 border-b-2 transition-all cursor-pointer ${
                 activeTab === "chat"
-                  ? "border-primary text-primary bg-primary/5"
+                  ? "border-primary text-primary bg-primary/5 font-semibold"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              <MessageSquare size={14} />
-              <span>AI Assistant</span>
+              <MessageSquare size={13} />
+              <span>Kanso AI</span>
             </button>
             <button
               onClick={() => setActiveTab("files")}
-              className={`flex-1 py-2.5 text-xs font-medium flex items-center justify-center gap-2 border-b-2 transition-all ${
+              className={`flex-1 py-2 text-xs font-mono font-medium flex items-center justify-center gap-1.5 border-b-2 transition-all cursor-pointer ${
                 activeTab === "files"
-                  ? "border-primary text-primary bg-primary/5"
+                  ? "border-primary text-primary bg-primary/5 font-semibold"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Folder size={14} />
+              <Folder size={13} />
               <span>Files ({fileList.length})</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("info")}
+              className={`px-3 py-2 text-xs font-mono font-medium flex items-center justify-center border-b-2 transition-all cursor-pointer ${
+                activeTab === "info"
+                  ? "border-primary text-primary bg-primary/5"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+              title="Project Information"
+            >
+              <Info size={13} />
             </button>
           </div>
 
+          {/* TAB 1: KANSO AI CHAT */}
           {activeTab === "chat" && (
-            <div className="flex-1 flex flex-col overflow-hidden p-3">
-              <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
+            <div className="flex-1 flex flex-col overflow-hidden p-3 bg-background/50">
+              <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
+                {/* Initial Plan Message */}
+                <div className="p-3 border border-border bg-card text-xs space-y-1.5">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+                    <span className="flex items-center gap-1 text-primary font-semibold">
+                      <Sparkles size={12} />
+                      Kanso Engine
+                    </span>
+                    <span>Ready</span>
+                  </div>
+                  <p className="text-muted-foreground text-xs leading-relaxed">
+                    Architecture compiled with {fileList.length} files. Ask me
+                    to add features, modify components, or adjust styles.
+                  </p>
+                </div>
+
+                {/* Message Log */}
                 {activeProject.messages &&
                   activeProject.messages.map((msg, i) => (
                     <div
                       key={i}
-                      className={`p-3 rounded-lg border text-xs space-y-1 ${
+                      className={`p-3 border text-xs space-y-1.5 font-sans ${
                         msg.role === "user"
-                          ? "bg-primary/10 border-primary/20 ml-6"
-                          : "bg-card border-border mr-6"
+                          ? "bg-primary/5 border-primary/30 ml-4"
+                          : "bg-card border-border mr-4"
                       }`}
                     >
-                      <span
-                        className={`font-semibold flex items-center gap-1.5 ${
-                          msg.role === "user"
-                            ? "text-primary"
-                            : "text-foreground"
-                        }`}
-                      >
-                        {msg.role === "assistant" ? (
-                          <>
-                            <Sparkles size={13} className="text-primary" />
-                            AI Assistant
-                          </>
-                        ) : (
-                          "You"
-                        )}
-                      </span>
-                      <p className="text-foreground whitespace-pre-wrap">
+                      <div className="flex items-center justify-between text-[10px] font-mono">
+                        <span
+                          className={`font-semibold uppercase tracking-wider flex items-center gap-1 ${
+                            msg.role === "user"
+                              ? "text-primary"
+                              : "text-foreground"
+                          }`}
+                        >
+                          {msg.role === "assistant" ? (
+                            <>
+                              <Sparkles size={11} className="text-primary" />
+                              Kanso AI
+                            </>
+                          ) : (
+                            "Developer"
+                          )}
+                        </span>
+                      </div>
+                      <p className="text-foreground whitespace-pre-wrap text-xs leading-relaxed">
                         {msg.content}
                       </p>
                     </div>
@@ -379,40 +583,111 @@ export default function BuilderPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <form onSubmit={onSendChat} className="mt-3 relative">
+              {/* Quick Prompt Suggestions */}
+              <div className="pt-2 pb-1 border-t border-border mt-2">
+                <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mb-1.5">
+                  Quick Actions:
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {QUICK_COPILOT_PROMPTS.map((qp, idx) => (
+                    <button
+                      key={idx}
+                      disabled={chatLoading}
+                      onClick={() => handleChat(qp)}
+                      className="text-[10px] px-2 py-0.5 border border-border bg-card hover:border-primary hover:text-primary text-muted-foreground transition-colors truncate max-w-full text-left font-mono cursor-pointer disabled:opacity-50"
+                    >
+                      + {qp}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Chat Input Form */}
+              <form onSubmit={onSendChat} className="mt-2 relative">
                 <input
                   type="text"
                   value={chatPrompt}
                   onChange={(e) => setChatPrompt(e.target.value)}
-                  placeholder="Ask AI to edit code..."
+                  placeholder="Describe your edits (e.g. Add dark mode)..."
                   disabled={chatLoading}
-                  className="w-full pl-3 pr-10 py-2 bg-input/50 border border-border rounded-lg text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full pl-3 pr-9 py-2 bg-input/40 border border-border rounded-none text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary font-sans"
                 />
                 <button
                   type="submit"
                   disabled={!chatPrompt.trim() || chatLoading}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 bg-primary text-primary-foreground rounded-md disabled:opacity-50"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 bg-primary text-primary-foreground rounded-none disabled:opacity-40 cursor-pointer"
+                  title="Send revision request"
                 >
                   {chatLoading ? (
-                    <Loader2 size={13} className="animate-spin" />
+                    <Loader2 size={12} className="animate-spin" />
                   ) : (
-                    <Send size={13} />
+                    <Send size={12} />
                   )}
                 </button>
               </form>
             </div>
           )}
 
+          {/* TAB 2: FILE EXPLORER */}
           {activeTab === "files" && (
-            <div className="flex-1 overflow-y-auto p-1 custom-scrollbar">
-              <ProjectFileTree
-                fileList={fileList}
-                selectedFile={activeFile}
-                onFileSelect={(filePath) => {
-                  setActiveFile(filePath);
-                  setShowCode(true);
-                }}
-              />
+            <div className="flex-1 flex flex-col overflow-hidden bg-background/40">
+              <div className="p-2.5 border-b border-border text-[11px] font-mono text-muted-foreground flex items-center justify-between">
+                <span>PROJECT TREE</span>
+                <span>{fileList.length} ITEMS</span>
+              </div>
+              <div className="flex-1 overflow-y-auto p-1.5 custom-scrollbar">
+                <ProjectFileTree
+                  fileList={fileList}
+                  selectedFile={activeFile}
+                  onFileSelect={(filePath) => {
+                    setActiveFile(filePath);
+                    setShowCode(true);
+                    setMobileTab("code");
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: PROJECT INFO */}
+          {activeTab === "info" && (
+            <div className="flex-1 p-4 space-y-4 overflow-y-auto text-xs font-mono bg-background/40">
+              <div>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">
+                  Project Title
+                </span>
+                <p className="font-semibold text-foreground">
+                  {activeProject.name || "Untitled Application"}
+                </p>
+              </div>
+
+              <div>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest block mb-1">
+                  Synthesis Prompt
+                </span>
+                <p className="p-2 border border-border bg-card text-muted-foreground text-[11px] font-sans leading-relaxed">
+                  {activeProject.description || "No description provided."}
+                </p>
+              </div>
+
+              <div className="space-y-1.5 border-t border-border pt-3">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Version:</span>
+                  <span className="text-foreground">
+                    v{activeProject.version || 1}.0
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total Files:</span>
+                  <span className="text-foreground">
+                    {fileList.length} files
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Framework:</span>
+                  <span className="text-foreground">React 19 + Tailwind</span>
+                </div>
+              </div>
             </div>
           )}
         </aside>
@@ -420,21 +695,26 @@ export default function BuilderPage() {
         {/* RESIZE DIVIDER */}
         <div
           onMouseDown={startResizingSidebar}
-          className={`w-1.5 h-full bg-border hover:bg-primary/50 cursor-col-resize flex items-center justify-center transition-colors group z-20 shrink-0 select-none ${
+          className={`hidden md:flex w-1.5 h-full bg-border hover:bg-primary cursor-col-resize items-center justify-center transition-colors group z-30 shrink-0 select-none ${
             isResizingSidebar ? "bg-primary" : ""
           }`}
-          title="Drag to resize sidebar"
+          title="Drag to resize studio sidebar"
         >
           <div
-            className={`w-0.5 h-6 rounded bg-muted-foreground/40 group-hover:bg-primary-foreground transition-colors ${
+            className={`w-0.5 h-6 rounded-none bg-muted-foreground/40 group-hover:bg-primary-foreground transition-colors ${
               isResizingSidebar ? "bg-primary-foreground" : ""
             }`}
           />
         </div>
 
+        {/* CENTER WORKSPACE (DASHBOARD OR PREVIEW PANEL) */}
         <main
           style={{ pointerEvents: isResizingSidebar ? "none" : "auto" }}
-          className="flex-1 overflow-hidden"
+          className={`overflow-hidden bg-background ${
+            mobileTab === "preview" || mobileTab === "code"
+              ? "flex flex-1 w-full h-full"
+              : "hidden md:flex md:flex-1"
+          }`}
         >
           {activeProject.status === "pending" ||
           activeProject.status === "generating" ||
@@ -445,11 +725,13 @@ export default function BuilderPage() {
               activeFile={activeFile}
               showCode={showCode}
               project={activeProject}
+              viewportMode={viewportMode}
             />
           )}
         </main>
       </div>
 
+      {/* PUBLISH MODAL */}
       {publishUrl && (
         <PublishModal
           publishUrl={publishUrl}

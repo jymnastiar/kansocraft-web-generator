@@ -222,9 +222,14 @@ Good copy makes design feel premium. Follow these rules:
 
 ## CODE CORRECTNESS — MANDATORY RULES
 - Every .js component file MUST have exactly ONE default export. E.g., \`export default function Header() { ... }\`
+- NEVER use Markdown headings or hash comments (like \`## component for Header.js\` or \`# Header\`) inside JavaScript code. All comments MUST use standard JavaScript comment syntax (\`// comment\` or \`/* comment */\`).
 - Always use \`className\`, NOT \`class\`. Always use \`htmlFor\`, NOT \`for\`.
 - Self-close void HTML elements: <img />, <br />, <hr />, <input />, <link />, <meta />. Never output tags like \`<img>\` or \`<br>\` without the closing slash.
-- Ensure all open JSX tags (like \`<div>\`, \`<section>\`, \`<button>\`, etc.) are fully closed.
+- Ensure all open JSX tags (like \`<div>\`, \`<section>\`, \`<button>\`, \`<h3>\`, \`<p>\`, \`<span>\`, etc.) are properly and fully closed with closing tags (e.g. \`<h3>Title</h3>\`, \`<p>Text</p>\`, \`<span>Tag</span>\`). NEVER repeat an opening tag as a closing tag (like \`<h3>Title<h3>\`).
+- NEVER put HTML tags (like \`<br />\`, \`<br>\`, or \`<div>\`) inside JavaScript arrays, variables, or object literals. HTML tags belong ONLY inside the JSX return statement.
+- Never write multi-line strings with single or double quotes without template literals \`...\`. For single/double quoted strings, keep them on one single line.
+- Style attributes in JSX MUST be objects, e.g. \`style={{ animationDelay: '0.2s' }}\`, NEVER strings like \`style="{...}"\`.
+- For Unsplash image URLs, always use the format \`https://images.unsplash.com/photo-[PHOTO_ID]?auto=format&fit=crop&w=800&q=80\`.
 - Never use TypeScript syntax (no interfaces, no types, no \`: React.FC\`, no \`as\`, no \`public/private\`). Output ONLY plain JavaScript/React.
 - Do NOT import packages that aren't react, react-dom, or standard sub-components.
 - Every component must return valid JSX wrapped in parentheses: \`return ( <div>...</div> );\`

@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { useStore } from "@/stores/store";
 import { supabase } from "./lib/supabaseClient";
 import Publish from "./pages/main/Publish";
+import NotFoundPage from "./pages/main/NotFound";
 
 function App() {
   useEffect(() => {
@@ -43,6 +44,9 @@ function App() {
 
       {/* Publish Routes */}
       <Route path="/publish/:id" element={<Publish />} />
+
+      {/* 404 Catch-All Route */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

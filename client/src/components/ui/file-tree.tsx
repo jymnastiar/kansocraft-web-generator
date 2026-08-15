@@ -231,9 +231,9 @@ export const TreeNode: React.FC<TreeNodeProps> = ({
   return (
     <div className="text-foreground relative select-none">
       <button
-        className={`w-full text-left flex items-center py-1 px-2 rounded-md cursor-pointer transition-colors text-xs ${
+        className={`w-full text-left flex items-center py-1.5 px-2.5 rounded-none cursor-pointer transition-colors text-xs font-mono ${
           isSelected
-            ? "bg-primary/15 text-primary font-medium border border-primary/20"
+            ? "bg-primary/10 text-primary font-semibold border-l-2 border-l-primary border-y-0 border-r-0"
             : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
         }`}
         onClick={handleToggle}

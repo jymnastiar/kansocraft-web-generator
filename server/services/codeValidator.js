@@ -49,6 +49,17 @@ export function validateAndFixCode(code, filePath, context) {
 
   // --- JS/JSX-specific fixes ---
 
+  // 1.5. Convert markdown headers/comments (e.g. ## component for Header.js or # File) to valid JS comments (// ...)
+  const markdownHeadingRegex = /^(\s*)#{1,6}\s+(.*)$/gm;
+  if (markdownHeadingRegex.test(code)) {
+    code = code.replace(/^(\s*)#{1,6}\s+(.*)$/gm, (match, indent, text) => {
+      warnings.push(
+        `${filePath}: Converted markdown header '# ${text}' to JavaScript comment '// ${text}'`,
+      );
+      return `${indent}// ${text}`;
+    });
+  }
+
   // 2. Fix `class=` → `className=` in JSX (but not inside strings or comments)
   // Match class= that appears inside JSX tags (after < and before >)
   const classFixRegex = /(<[a-zA-Z][^>]*?)\bclass=/g;
@@ -139,7 +150,63 @@ export function validateAndFixCode(code, filePath, context) {
     warnings.push(`${filePath}: Added missing React import`);
   }
 
-  // 9. Fix import paths that point to incorrect folders/paths compared to what was planned
+
+
+  // 10. Fix raw multiline single/double-quote strings in JS (which cause SyntaxError: Unterminated string constant)
+  code = code.replace(/:\s*'([^']*\n[^']*)'/g, (match, content) => {
+    const singleLine = content.replace(/\s*\n\s*/g, " ");
+    warnings.push(
+      `${filePath}: Converted multiline single-quote string to single line`,
+    );
+    return `: '${singleLine}'`;
+  });
+  code = code.replace(/:\s*"([^"]*\n[^"]*)"/g, (match, content) => {
+    const singleLine = content.replace(/\s*\n\s*/g, " ");
+    warnings.push(
+      `${filePath}: Converted multiline double-quote string to single line`,
+    );
+    return `: "${singleLine}"`;
+  });
+
+  // 11. Fix cases where opening tag was duplicated instead of closing: e.g. <h3 ...>{title}<h3>
+  const badClosingTagRegex =
+    /(<(h[1-6]|p|span|strong|b|em|i)\b[^>]*>[^<]*?)<(\2)>/gi;
+  if (badClosingTagRegex.test(code)) {
+    code = code.replace(
+      /(<(h[1-6]|p|span|strong|b|em|i)\b[^>]*>[^<]*?)<(\2)>/gi,
+      "$1</$2>",
+    );
+    warnings.push(
+      `${filePath}: Corrected duplicated opening tags into closing tags (e.g. <h3>...</h3>)`,
+    );
+  }
+
+  // 12. Fix style="{...}" string syntax in JSX into style={{...}}
+  const badStyleRegex = /style="\{([^"]+)\}"/g;
+  if (badStyleRegex.test(code)) {
+    code = code.replace(/style="\{([^"]+)\}"/g, (match, inner) => {
+      const cleanInner = inner.replace(/;\s*$/, "");
+      warnings.push(
+        `${filePath}: Fixed JSX style string into style={{...}} object`,
+      );
+      return `style={{ ${cleanInner} }}`;
+    });
+  }
+
+  // 13. Fix Unsplash photo ID missing 'photo-' prefix in URLs
+  const unsplashRegex =
+    /https:\/\/images\.unsplash\.com\/([0-9]{10,}-[a-f0-9]+)/gi;
+  if (unsplashRegex.test(code)) {
+    code = code.replace(
+      /https:\/\/images\.unsplash\.com\/([0-9]{10,}-[a-f0-9]+)/gi,
+      "https://images.unsplash.com/photo-$1",
+    );
+    warnings.push(
+      `${filePath}: Added missing 'photo-' prefix to Unsplash image URL`,
+    );
+  }
+
+  // 14. Fix import paths that point to incorrect folders/paths compared to what was planned
   if (context?.allPlannedFiles) {
     const fixResult = fixImportPaths(code, filePath, context.allPlannedFiles);
     code = fixResult.code;
@@ -161,6 +228,20 @@ export function validateRevisionContent(content, filePath, op) {
   // For update ops (search/replace content), only apply safe fixes
   // that won't break the partial context
   const warnings = [];
+
+  // Convert markdown headers/comments to valid JS comments in JS files
+  const isJS = filePath.endsWith(".js") || filePath.endsWith(".jsx");
+  if (isJS) {
+    const markdownHeadingRegex = /^(\s*)#{1,6}\s+(.*)$/gm;
+    if (markdownHeadingRegex.test(content)) {
+      content = content.replace(/^(\s*)#{1,6}\s+(.*)$/gm, (match, indent, text) => {
+        warnings.push(
+          `${filePath}: Converted markdown header '# ${text}' to JavaScript comment '// ${text}'`,
+        );
+        return `${indent}// ${text}`;
+      });
+    }
+  }
 
   // Fix class → className
   const classFixRegex = /(<[a-zA-Z][^>]*?)\bclass=/g;

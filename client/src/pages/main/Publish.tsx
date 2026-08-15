@@ -1,9 +1,9 @@
 import FullPagePreview from "@/components/preview-page/FullPagePreview";
 import Loading from "@/components/ui/loading";
 import { useStore } from "@/stores/store";
-import { AlertCircleIcon } from "lucide-react";
+import { AlertCircleIcon, ArrowLeft } from "lucide-react";
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 export default function PublishPage() {
   const { id } = useParams();
@@ -27,20 +27,27 @@ export default function PublishPage() {
 
   if (publishError || !publishedProject) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center px-4 text-center">
-        <div className="w-12 h-12 flex items-center justify-center mb-4 text-destructive">
+      <div className="h-screen w-screen flex flex-col items-center justify-center px-4 text-center bg-background text-foreground font-sans">
+        <div className="size-12 border border-destructive/30 bg-destructive/10 text-destructive flex items-center justify-center mb-4">
           <AlertCircleIcon size={24} />
         </div>
-        <h1 className="text-lg font-semibold mb-1.5">Website Unavailable</h1>
-        <p className="text-sm max-w-sm leading-relaxed mb-6">
+        <h1 className="text-base font-bold font-heading uppercase tracking-wider mb-2">
+          Website Unavailable
+        </h1>
+        <p className="text-xs text-muted-foreground max-w-sm leading-relaxed mb-6 font-mono">
           {publishError ||
-            "This website is not available or is not published yet"}
+            "This project is not published or the link has expired."}
         </p>
-        <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-          KansoCraft
-        </div>
+        <Link
+          to="/"
+          className="px-4 py-2 border border-border bg-card text-xs font-mono font-semibold hover:border-primary transition-colors flex items-center gap-1.5"
+        >
+          <ArrowLeft size={13} />
+          <span>Return to KansoCraft</span>
+        </Link>
       </div>
     );
   }
+
   return <FullPagePreview files={publishedProject.files} />;
 }

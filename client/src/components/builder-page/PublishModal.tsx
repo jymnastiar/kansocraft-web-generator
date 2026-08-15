@@ -31,16 +31,16 @@ export default function PublishModal({
       .then(() => {
         setCopied(true);
         toast.add({
-          title: "Public Link Copied",
-          description: "Public link copied to clipboard",
+          title: "Link Copied",
+          description: "Public URL copied to clipboard",
           type: "success",
         });
         setTimeout(() => setCopied(false), 2000);
       })
       .catch((err: any) => {
         toast.add({
-          title: "Error copy",
-          description: err,
+          title: "Error copying",
+          description: err.message || "Failed to copy",
           type: "error",
         });
       });
@@ -53,30 +53,30 @@ export default function PublishModal({
         if (!open) onClose();
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md rounded-none border border-border bg-card font-sans">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/20">
-              <Globe className="h-5 w-5" />
+            <div className="size-9 rounded-none border border-primary/30 bg-primary/10 text-primary flex items-center justify-center shrink-0">
+              <Globe className="size-5" />
             </div>
             <div>
-              <DialogTitle className="text-base font-semibold">
-                Your website is live!
+              <DialogTitle className="text-sm font-bold font-heading uppercase tracking-wider text-foreground">
+                Website Live & Published
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                Anyone with the link below can view your published site.
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5 font-mono">
+                Anyone with the link below can access your live site.
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="space-y-3 py-2">
+        <div className="space-y-3 py-3">
           <div className="space-y-1.5">
             <Label
               htmlFor="publish-url"
-              className="text-xs font-medium text-muted-foreground"
+              className="text-xs font-mono font-medium text-muted-foreground uppercase"
             >
-              Published link
+              Public Production URL
             </Label>
             <div className="flex gap-2">
               <Input
@@ -84,23 +84,23 @@ export default function PublishModal({
                 type="text"
                 readOnly
                 value={publishUrl}
-                className="font-mono text-xs select-all flex-1"
+                className="font-mono text-xs select-all flex-1 rounded-none border-border"
               />
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleCopyLink}
-                className="shrink-0 h-8 gap-1.5"
+                className="shrink-0 h-8 gap-1.5 rounded-none font-mono text-xs"
               >
                 {copied ? (
                   <>
-                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                    <Check className="size-3.5 text-primary" />
                     <span>Copied</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="h-3.5 w-3.5" />
+                    <Copy className="size-3.5" />
                     <span>Copy</span>
                   </>
                 )}
@@ -109,16 +109,25 @@ export default function PublishModal({
           </div>
         </div>
 
-        <DialogFooter className="sm:justify-end gap-2 pt-2">
+        <DialogFooter className="sm:justify-end gap-2 pt-2 border-t border-border/50">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="rounded-none font-mono text-xs"
+            onClick={onClose}
+          >
+            Close
+          </Button>
           <Button
             type="button"
             variant="default"
             size="sm"
-            className="w-full sm:w-auto gap-1.5"
+            className="rounded-none font-mono text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={() => window.open(publishUrl, "_blank")}
           >
-            <span>Open Site</span>
-            <ExternalLink className="h-3.5 w-3.5" />
+            <span>Open Website</span>
+            <ExternalLink className="size-3.5" />
           </Button>
         </DialogFooter>
       </DialogContent>

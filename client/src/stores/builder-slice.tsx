@@ -4,7 +4,7 @@ import type { StateCreator } from "zustand";
 import debounce from "lodash.debounce";
 import { toast } from "@/components/ui/toast";
 
-export type BuilderTab = "chat" | "files";
+export type BuilderTab = "chat" | "files" | "info";
 
 interface BuilderState {
   activeFile: string;
