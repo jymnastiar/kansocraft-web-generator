@@ -227,7 +227,7 @@
   }
 }
 
-@keyframes loadingBar {
+@keyframes loading-bar {
   0% {
     left: -35%;
     width: 30%;
@@ -243,6 +243,5 @@
 }
 
 .animate-loading-bar {
-  animation: loadingBar 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  animation: loading-bar 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
-

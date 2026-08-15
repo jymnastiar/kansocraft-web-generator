@@ -7,7 +7,7 @@ import {
   SandpackProvider,
   useSandpack,
 } from "@codesandbox/sandpack-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "@/stores/store";
 import SandpackErrorMonitor from "./SandpackErrorMonitor";
 import { FileCode, Smartphone, Tablet } from "lucide-react";
@@ -255,12 +255,14 @@ export default function PreviewPanel({
         >
           {/* CODE EDITOR PANEL */}
           <div
-            style={{
-              width: showCode ? `${leftWidth}%` : "0%",
-            }}
+            style={
+              {
+                "--editor-width": showCode ? `${leftWidth}%` : "0%",
+              } as React.CSSProperties
+            }
             className={cn(
-              "flex-col h-full border-r border-border bg-[#09090b]",
-              showCode ? "flex w-full md:w-auto md:min-w-60 shrink-0" : "hidden",
+              "flex-col h-full border-r border-border bg-[#09090b] md:w-(--editor-width)",
+              showCode ? "flex w-full md:min-w-60 shrink-0" : "hidden",
             )}
           >
             {showCode &&

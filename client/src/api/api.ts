@@ -45,15 +45,19 @@ export interface ProjectSummary {
 }
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL || "http://localhost:3000",
+  baseURL: import.meta.env.PROD ? import.meta.env.VITE_BASE_URL : "",
   withCredentials: true,
 });
 
 api.interceptors.request.use(async (config) => {
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (err: any) {
+    console.warn("Failed to read Supabase session", err);
   }
   return config;
 });

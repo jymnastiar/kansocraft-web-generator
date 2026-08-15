@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 import { useStore } from "@/stores/store";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ProjectFileTree from "@/components/ui/file-tree";
@@ -291,7 +291,7 @@ export default function BuilderPage() {
             <span className="text-xs font-bold font-heading text-foreground tracking-tight max-w-28 sm:max-w-48 truncate">
               {activeProject.name || "Untitled Application"}
             </span>
-            <span className="text-[10px] font-mono font-bold bg-primary/10 text-primary border border-primary/30 px-1.5 py-0.2 shrink-0">
+            <span className="text-[10px] font-mono font-bold bg-primary/10 text-primary border border-primary/30 px-1.5 py-0.5 shrink-0">
               v{activeProject.version || 1}.0
             </span>
           </div>
@@ -477,15 +477,16 @@ export default function BuilderPage() {
       >
         {/* LEFT STUDIO SIDEBAR */}
         <aside
-          style={{
-            width:
-              typeof window !== "undefined" && window.innerWidth < 768
-                ? "100%"
-                : `${sidebarWidth}px`,
-          }}
-          className={`shrink-0 border-r border-border bg-card flex-col z-20 ${
+          // style={{
+          //   width:
+          //     typeof window !== "undefined" && window.innerWidth < 768
+          //       ? "100%"
+          //       : `${sidebarWidth}px`,
+          // }}
+          style={{ "--sidebar-w": `${sidebarWidth}px` } as React.CSSProperties}
+          className={`shrink-0 border-r border-border bg-card flex-col z-20 w-full md:w-(--sidebar-w) ${
             mobileTab === "copilot" || mobileTab === "files"
-              ? "flex w-full md:w-auto"
+              ? "flex"
               : "hidden md:flex"
           }`}
         >

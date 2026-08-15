@@ -42,37 +42,15 @@ app.use((err, _req, res, _next) => {
         : err.message,
   });
 });
-// Database connection middleware for Serverless environments (like Vercel)
-let isDbConnected = false;
-async function dbMiddleware(req, res, next) {
-  if (!isDbConnected) {
-    try {
-      await connectToDatabase();
-      isDbConnected = true;
-    } catch (err) {
-      return next(err);
-    }
-  }
-  next();
-}
-
-if (process.env.VERCEL) {
-  app.use(dbMiddleware);
-}
-
 const port = process.env.PORT || 3000;
 
-if (!process.env.VERCEL) {
-  connectToDatabase()
-    .then(() => {
-      app.listen(port, () => {
-        console.log(`Server is running at http://localhost:${port}`);
-      });
-    })
-    .catch((err) => {
-      console.error("Failed to connect to the database:", err);
-      process.exit(1);
+connectToDatabase()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Server is running at http://localhost:${port}`);
     });
-}
-
-export default app;
+  })
+  .catch((err) => {
+    console.error("Failed to connect to the database:", err);
+    process.exit(1);
+  });

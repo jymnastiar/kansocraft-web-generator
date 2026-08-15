@@ -150,16 +150,7 @@ export function validateAndFixCode(code, filePath, context) {
     warnings.push(`${filePath}: Added missing React import`);
   }
 
-  // 9. Remove stray HTML void tags (<br />, <br>) inserted into JS data structures or expressions
-  const strayBrRegex = /(?:,\s*|<br\s*\/?>\s*,\s*|:\s*)<br\s*\/?>/gi;
-  if (strayBrRegex.test(code)) {
-    code = code.replace(/,\s*<br\s*\/?>\s*/gi, ", ");
-    code = code.replace(/<br\s*\/?>\s*,/gi, ", ");
-    code = code.replace(/:\s*<br\s*\/?>\s*/gi, ": ");
-    warnings.push(
-      `${filePath}: Removed stray <br /> tags from JavaScript data structures`,
-    );
-  }
+
 
   // 10. Fix raw multiline single/double-quote strings in JS (which cause SyntaxError: Unterminated string constant)
   code = code.replace(/:\s*'([^']*\n[^']*)'/g, (match, content) => {

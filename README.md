@@ -16,7 +16,7 @@
 
 <br />
 
-[Features](#-key-features) • [Architecture](#-architecture) • [Tech Stack](#-tech-stack) • [Quick Start](#-quick-start) • [Environment Variables](#-environment-variables) • [API Reference](#-api-endpoints) • [How It Works](#-how-it-works)
+[Features](#key-features) • [Architecture](#architecture) • [Tech Stack](#tech-stack) • [Quick Start](#quick-start) • [Environment Variables](#environment-variables) • [API Reference](#api-endpoints) • [How It Works](#how-it-works)
 
 </div>
 
@@ -221,25 +221,25 @@ cd kansocraft
 
 ### Backend (`server/.env`)
 
-| Variable                | Type   | Description                                             | Example                                                  |
-| :---------------------- | :----- | :------------------------------------------------------ | :------------------------------------------------------- |
-| `PORT`                  | Number | HTTP server port                                        | `3000`                                                   |
-| `ORIGINS`               | String | Allowed origins for CORS API access (comma-separated)   | `http://localhost:5173,http://localhost:3000`            |
-| `MONGODB_URI`           | String | MongoDB connection URI                                  | `mongodb+srv://user:pass@cluster.mongodb.net/kansocraft` |
-| `SUPABASE_URL`          | String | Supabase project URL                                    | `https://your-project.supabase.co`                       |
-| `SUPABASE_ANON_KEY`     | String | Supabase client anonymous API key                       | `sb_publishable_...`                                     |
-| `OPENROUTER_API_KEY`    | String | API key for OpenRouter                                  | `sk-or-v1-...`                                           |
-| `OPENROUTER_MODEL`      | String | LLM model to use for generation                         | `openrouter/free` or `anthropic/claude-3.5-sonnet`     |
-| `AI_MAX_CONCURRENCY`    | Number | Number of files generated concurrently                  | `4`                                                      |
-| `AI_REQUEST_TIMEOUT_MS` | Number | Timeout for AI requests in milliseconds                  | `90000`                                                  |
+| Variable                | Type   | Description                                           | Example                                                  |
+| :---------------------- | :----- | :---------------------------------------------------- | :------------------------------------------------------- |
+| `PORT`                  | Number | HTTP server port                                      | `3000`                                                   |
+| `ORIGINS`               | String | Allowed origins for CORS API access (comma-separated) | `http://localhost:5173,http://localhost:3000`            |
+| `MONGODB_URI`           | String | MongoDB connection URI                                | `mongodb+srv://user:pass@cluster.mongodb.net/kansocraft` |
+| `SUPABASE_URL`          | String | Supabase project URL                                  | `https://your-project.supabase.co`                       |
+| `SUPABASE_ANON_KEY`     | String | Supabase client anonymous API key                     | `sb_publishable_...`                                     |
+| `OPENROUTER_API_KEY`    | String | API key for OpenRouter                                | `sk-or-v1-...`                                           |
+| `OPENROUTER_MODEL`      | String | LLM model to use for generation                       | `openrouter/free` or `anthropic/claude-3.5-sonnet`       |
+| `AI_MAX_CONCURRENCY`    | Number | Number of files generated concurrently                | `4`                                                      |
+| `AI_REQUEST_TIMEOUT_MS` | Number | Timeout for AI requests in milliseconds               | `90000`                                                  |
 
 ### Frontend (`client/.env`)
 
-| Variable                 | Type   | Description                    | Example                            |
-| :----------------------- | :----- | :----------------------------- | :--------------------------------- |
-| `VITE_SUPABASE_URL`      | String | Supabase project URL           | `https://your-project.supabase.co` |
+| Variable                 | Type   | Description                       | Example                            |
+| :----------------------- | :----- | :-------------------------------- | :--------------------------------- |
+| `VITE_SUPABASE_URL`      | String | Supabase project URL              | `https://your-project.supabase.co` |
 | `VITE_SUPABASE_ANON_KEY` | String | Supabase client anonymous API key | `sb_publishable_...`               |
-| `VITE_BASE_URL`          | String | Backend API base URL           | `http://localhost:3000`            |
+| `VITE_BASE_URL`          | String | Backend API base URL              | `http://localhost:3000`            |
 
 ---
 
@@ -249,21 +249,21 @@ All endpoints are protected by Supabase JWT Bearer token authentication unless m
 
 ### Projects
 
-| Method   | Endpoint                    |    Auth     | Description                                               |
-| :------- | :-------------------------- | :---------: | :-------------------------------------------------------- |
-| `POST`   | `/api/projects`             |     🔒      | Creates a new project and triggers the AI Gen Pipeline    |
-| `GET`    | `/api/projects`             |     🔒      | Fetches all projects owned by the user                    |
-| `GET`    | `/api/projects/:id`         |     🔒      | Fetches details of a specific project and all its files   |
-| `PUT`    | `/api/projects/:id/files`   |     🔒      | Manually updates file contents                            |
-| `POST`   | `/api/projects/:id/publish` |     🔒      | Toggles the publication status of a project               |
-| `DELETE` | `/api/projects/:id`         |     🔒      | Deletes a project                                         |
-| `GET`    | `/api/projects/public/:id`  | 🌐 [Public] | Fetches public project files                              |
+| Method   | Endpoint                    |    Auth     | Description                                             |
+| :------- | :-------------------------- | :---------: | :------------------------------------------------------ |
+| `POST`   | `/api/projects`             |     🔒      | Creates a new project and triggers the AI Gen Pipeline  |
+| `GET`    | `/api/projects`             |     🔒      | Fetches all projects owned by the user                  |
+| `GET`    | `/api/projects/:id`         |     🔒      | Fetches details of a specific project and all its files |
+| `PUT`    | `/api/projects/:id/files`   |     🔒      | Manually updates file contents                          |
+| `POST`   | `/api/projects/:id/publish` |     🔒      | Toggles the publication status of a project             |
+| `DELETE` | `/api/projects/:id`         |     🔒      | Deletes a project                                       |
+| `GET`    | `/api/projects/public/:id`  | 🌐 [Public] | Fetches public project files                            |
 
 ### Copilot / AI Chat
 
-| Method | Endpoint                 | Auth | Description                                                   |
-| :----- | :----------------------- | :--: | :------------------------------------------------------------ |
-| `POST` | `/api/projects/:id/chat` |  🔒  | Sends revision instructions to the AI Copilot for code edits  |
+| Method | Endpoint                 | Auth | Description                                                  |
+| :----- | :----------------------- | :--: | :----------------------------------------------------------- |
+| `POST` | `/api/projects/:id/chat` |  🔒  | Sends revision instructions to the AI Copilot for code edits |
 
 ---
 

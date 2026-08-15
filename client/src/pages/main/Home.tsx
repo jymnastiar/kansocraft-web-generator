@@ -788,7 +788,11 @@ export default function HomePage() {
                   <AlertDialogAction
                     className="rounded-none gap-1.5"
                     onClick={() =>
-                      window.open("https://kreate.gg/jymnastiar", "_blank")
+                      window.open(
+                        "https://kreate.gg/jymnastiar",
+                        "_blank",
+                        "noopener,noreferrer",
+                      )
                     }
                   >
                     <span>Visit kreate.gg/jymnastiar</span>

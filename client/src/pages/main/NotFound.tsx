@@ -1,6 +1,6 @@
 import { ArrowLeft, Home, Terminal } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 export default function NotFoundPage() {
   const navigate = useNavigate();
@@ -42,14 +42,12 @@ export default function NotFoundPage() {
             Go Back
           </Button>
 
-          <Link to="/" className="w-full sm:w-auto">
-            <Button
-              variant="default"
-              className="w-full text-xs font-mono uppercase tracking-wider gap-2 cursor-pointer"
-            >
-              <Home size={14} />
-              Return Home
-            </Button>
+          <Link
+            to="/"
+            className={`w-full sm:w-auto text-xs font-mono uppercase tracking-wider gap-2 cursor-pointer ${buttonVariants({ variant: "default" })}`}
+          >
+            <Home size={14} />
+            Return Home
           </Link>
         </div>
 
