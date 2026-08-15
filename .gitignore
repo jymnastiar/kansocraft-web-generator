@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 qa-report
+result
 
 # Environment variables
 .env

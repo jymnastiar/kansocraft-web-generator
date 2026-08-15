@@ -17,26 +17,24 @@ import {
   validateRevisionContent,
 } from "./codeValidator.js";
 
-// --- OpenRouter Model Client Setup ---
-const MODEL = process.env.OPENROUTER_MODEL || "openrouter/free";
+// OpenRouter Model Client Setup
+const MODEL = (process.env.OPENROUTER_MODEL || "").trim() || "openrouter/free";
 const MAX_CONCURRENCY = Math.max(
   1,
-  parseInt(process.env.AI_MAX_CONCURRENCY || "6", 10) || 6,
+  parseInt(process.env.AI_MAX_CONCURRENCY || "2", 10) || 2,
 );
 const AI_REQUEST_TIMEOUT_MS = parseInt(
   process.env.AI_REQUEST_TIMEOUT_MS || "90000",
   10,
 );
-
-if (!process.env.OPENROUTER_API_KEY) {
+const openrouterApiKey = (process.env.OPENROUTER_API_KEY || "").trim();
+if (!openrouterApiKey) {
   throw new Error("OPENROUTER_API_KEY environment variable is required");
 }
-
 const openrouter = createOpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY,
+  apiKey: openrouterApiKey,
 });
-
 const model = openrouter(MODEL);
 
 // Generate a single file's code
@@ -56,7 +54,7 @@ async function generateSingleFile(
     schema: FileCodeSchema,
     system,
     prompt: userMsg,
-    maxRetries: 2,
+    maxRetries: 1,
     abortSignal: AbortSignal.timeout(AI_REQUEST_TIMEOUT_MS),
   });
 
@@ -94,7 +92,7 @@ export async function generateProject(prompt, callbacks) {
     schema: FilePlanSchema,
     system: FILE_PLAN_SYSTEM,
     prompt: `Plan a React website for: ${prompt}`,
-    maxRetries: 2,
+    maxRetries: 1,
     abortSignal: AbortSignal.timeout(AI_REQUEST_TIMEOUT_MS),
   });
 
@@ -217,6 +215,7 @@ export async function generateProject(prompt, callbacks) {
   return { files, description: plan.projectDescription };
 }
 
+// Revision from user chat
 export async function reviseProject(
   prompt,
   manifest,
@@ -255,7 +254,7 @@ export async function reviseProject(
     schema: RevisionResultSchema,
     system: REVISE_SYSTEM,
     prompt: contextParts.join("\n"),
-    maxRetries: 2,
+    maxRetries: 1,
     abortSignal: AbortSignal.timeout(AI_REQUEST_TIMEOUT_MS),
   });
 

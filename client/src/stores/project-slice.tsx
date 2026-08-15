@@ -1,5 +1,5 @@
 import type { Project } from "@/api/api";
-import api, { initialProjects } from "../api/api";
+import api from "../api/api";
 import axios from "axios";
 import { type StateCreator } from "zustand";
 import type { Store } from "@/types/store";
@@ -31,7 +31,7 @@ export const createProjectSlice: StateCreator<
   [],
   ProjectSlice
 > = (set, get) => ({
-  projects: initialProjects,
+  projects: [],
   loadingProjects: true,
   generatingProject: false,
   activeProject: null,
@@ -94,6 +94,7 @@ export const createProjectSlice: StateCreator<
     const userId = get().user?.id;
     if (!userId) {
       set((state) => {
+        state.projects = [];
         state.loadingProjects = false;
       });
       return;
@@ -101,9 +102,12 @@ export const createProjectSlice: StateCreator<
     try {
       const { data } = await api.get<Project[]>("/api/projects");
       set((state) => {
-        state.projects = data;
+        state.projects = Array.isArray(data) ? data : [];
       });
     } catch (err: any) {
+      set((state) => {
+        state.projects = [];
+      });
       throw err;
     } finally {
       set((state) => {

@@ -14,6 +14,7 @@ export const chatLimiter = rateLimit({
   windowMs: 60 * 1000,
   limit: 15,
   keyGenerator: (req) => req.user?.userId || req.ip,
+  validate: { keyGeneratorIpFallback: false },
   message: { error: "Too many chat requests. Please try again in 1 minute." },
   standardHeaders: true,
   legacyHeaders: false,
